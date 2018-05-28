@@ -39,6 +39,9 @@ loginrequest.getLogin =  function( req, res ) {
                 }
               });
             }else{
+              if( !req.query.gw_address || !req.query.gw_port || !req.query.mac ) {
+                  return Errors.errorMissingParam(res, '');
+              }
               console.log("User does not exists..show login page")
               renderLoginPage(res, req.query.gw_address,req.query.gw_port, req.query.mac );
             }

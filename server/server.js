@@ -4,7 +4,7 @@ var express = require('express');
 var chalk = require('chalk');
 var mongoose = require('mongoose');
 var path = require('path');
-mongoose.connect(config.mongo.uri, config.mongo.options);
+mongoose.connect('mongodb://' + config.mongo.host + '/' + config.mongo.name, config.mongo.options);
 
 
 var app = express();

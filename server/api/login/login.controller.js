@@ -8,6 +8,7 @@ var config = require('../../config/environment');
 var loginrequest = {};
 var SERVICES = require('../../config/services');
 var moment = require( 'moment' );
+var Vcodes = require( '../code/code.controller' );
 /**
    * Receive request to login
    */
@@ -63,17 +64,27 @@ loginrequest.getLogin =  function( req, res ) {
     res.render('userinfo', data);
  }
 
-  loginrequest.saveUser = function( req, res ) { 
-     if( !req.body.email ) {
-        return Errors.errorMissingParam(res, 'email');
+  loginrequest.saveUser = async function( req, res ) {
+    if( !req.body.phone ) {
+        return Errors.errorMissingParam(res, 'phone');
+    }
+    if( !req.body.code ) {
+        return Errors.errorMissingParam(res, 'verification code');
     }
     if( !req.body.mac ) {
         return Errors.errorMissingParam(res, 'mac');
     }
+
+    var tmp = await Vcodes.chkCode( req.body.phone.toString(), req.body.code.toString() );
+
+    if ( !tmp ) {
+        return Errors.errorCustom(res,"wrong verification code!");
+    }
+
     var token = crypt.randomBytes( 64 ).toString('hex');
     
     var now = moment();
-    var email = req.body.email.toString();
+    var email = req.body.phone.toString() + "@xxx.com";
     User.update( { "mac": req.body.mac }, { $set: { "updated_at": Date.now(), lastLoginTime: Math.floor( now.format( 'x' ) ) } }, function(err, nUpdated, rawResponse){
       if(err) return Errors.errorServer( res, err );
       if(nUpdated && !nUpdated.nModified) {

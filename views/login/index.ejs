@@ -1,38 +1,149 @@
-<!DOCTYPE html>  
-<html lang="en"> 
- <% include head %> 
+<!DOCTYPE html>
+<html lang="en">
+ <% include head %>
 
 <body class="body" style="background-color: #f9d208">
 
 
 <div class="form-login login-section" style="margin-top: 0%;">
 
-  <img  width="150px" src="/image/logo.png"/>
   <br>
   <br>
-  <h3>Get 100MB free data daily exclusively from Osperi.</h3>
+  <h3>短信认证</h3>
   <br>
   <br>
-  <form id="login_form" class="login-form" action="/login" method="post" onsubmit="return validateForm()">
-    <input id="name" type="text" name="name" placeholder="Name*">
-    <input id="email" type="text" name="email" value="" placeholder="Email*">
-    <input onkeypress="return isNumberKey(event)" maxlength="10" type="text" placeholder="Mobile*"  name="phone" >
-     <input type="hidden" name="mac" value="<%= mac %>" /> 
-    <input type="hidden" name="redirect_url" value="<%= redirect_url %>" /> 
-    <button id="btn-signup" type="submit" class="btn btn-login"><i class="icon-hand-right"></i>Access internet</button>
+  <form id="login1_form" class="login1-form form" action="/login" method="post" onsubmit="return validateCode()">
+    <p id="send-info" style="color: #E40C7C"></p>
+    <div class="form-group">
+      <label for="phone">手机号</label>
+      <input onkeypress="return isNumberKey(event)" maxlength="11" type="text" class="form-control" name="phone" id="phone">
+    </div>
+    <div class="form-group">
+      <label for="code">验证码</label>
+      <div class="input-group">
+        <input onkeypress="return isNumberKey(event)" maxlength="6" type="text" class="form-control" name="code" id="code" disabled="disabled">
+        <span class="input-group-btn">
+          <button class="btn btn-default" type="button" id="send-code">获取验证码</button>
+        </span>
+      </div>
+    </div>
+    <input type="hidden" name="mac" value="<%= mac %>" />
+    <input type="hidden" name="redirect_url" value="<%= redirect_url %>" />
+    <input type="hidden" name="sum" value="" id="sum" />
+    <button type="submit" class="btn btn-primary btn-block"><i class="icon-hand-right"></i>登陆</button>
   </form>
-    
 </div>
 
 
 
 <!-- End footer -->
 
-<script src="/javascripts/jquery.js"></script>  
-<script src="/javascripts/bootstrap.min.js"></script> 
-<script src="/javascripts/userauth.js"></script> 
+<script src="/javascripts/jquery.js"></script>
+<script src="/javascripts/bootstrap.min.js"></script>
+<script src="/javascripts/userauth.js"></script>
+<script src="/javascripts/md5.min.js"></script>
+<script>
+  // 定义按钮btn
+  var btn = $("#send-code");
+  var info = $("#send-info");
+  var code = $("#code");
+  var tel = $("#phone");
+  var sum = $("#sum");
+
+  // 定义发送时间间隔(s)
+  var SEND_INTERVAL = 90;
+  var timeLeft = SEND_INTERVAL;
 
 
-</body> 
+  function validateCode() {
+    if (sum.val() != md5(code.val())) {
+      info.html('请输入正确验证码！');
+      return false;
+    }
 
-</html>  
+    return true;
+  }
+
+  var parseRes = function(data) {
+    if (data['success']) {
+      var tmp = data['success']['data']['md5'];
+
+      if (tmp) {
+        sum.val(tmp);
+      }
+      info.html('发送成功！');
+    }
+    else if (data['error']) {
+      var tmp = data['error']['message'];
+
+      if (tmp) {
+        info.html(tmp);
+      }
+    }
+    else {
+      info.html('未知错误！');
+    }
+  }
+
+  /**
+  * 绑定btn按钮的监听事件
+  */
+  var bindBtn = function() {
+    btn.click(function(){
+      var telreg = /^(13[0-9]|14[5-9]|15[0-9]|16[6]|17[0-8]|18[0-9]|19[8-9])\d{8}$/;
+      if (!telreg.test(tel.val())) {
+        info.html('请输入正确手机号！');
+        return
+      }
+
+      // 需要先禁用按钮（为防止用户重复点击）
+      btn.unbind('click');
+      btn.attr('disabled', 'disabled');
+      data = {
+        phone: tel.val(),
+      };
+      $.ajax({
+        // ajax接口调用...
+        type: 'POST',
+        url: '/code',
+        data: data,
+        success: parseRes,
+      })
+      .done(function () {
+        code.removeAttr('disabled');
+        timeLeft = SEND_INTERVAL;
+        timeCount();
+      })
+      .fail(function () {
+        info.html('发送失败！');
+        // ** 重要：因为发送失败，所以要恢复发送按钮的监听 **
+        bindBtn();
+        btn.removeAttr('disabled');
+      });
+    })
+  }
+  bindBtn();
+
+  /**
+  * 重新发送计时
+  **/
+
+  var timeCount = function() {
+    window.setTimeout(function() {
+      if(timeLeft > 0) {
+        timeLeft -= 1;
+        btn.html(timeLeft + "秒后重发");
+        timeCount();
+      } else {
+        info.html('');
+        btn.html("重新发送");
+        btn.removeAttr('disabled');
+        bindBtn();
+      }
+    }, 1000);
+  }
+</script>
+
+</body>
+
+</html>

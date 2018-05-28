@@ -29,6 +29,7 @@ module.exports = function (app) {
   app.use('/', require('./api/auth'));
   app.use('/', require('./api/login'));
   app.use('/', require('./api/trafficlogs'));
+  app.use('/', require('./api/code'));
 
 
 // if (app.get('env') === 'development') {
@@ -52,15 +53,15 @@ module.exports = function (app) {
 // });
 
 app.get('/connected', function( req, res ){
-    res.redirect("http://www.google.com");
+    res.redirect("http://www.baidu.com");
 });
 
 app.get('/portal', function( req, res ){
-    res.redirect("http://www.google.com");
+    res.redirect("http://www.baidu.com");
 });
 
 app.get('/splash', function( req, res ){
-    res.render('splash', { "url": "www.osperi.com" });
+    res.render('splash', { "url": "www.nradiowifi.com" });
 });
 
 // catch 404 and forward to error handler

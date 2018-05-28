@@ -1,0 +1,19 @@
+mongo:
+  image: mongo:3.6.0
+  privileged: false
+  restart: always
+redis:
+  image: redis:4.0-alpine
+  privileged: false
+  restart: always
+portal:
+  build: .
+  links:
+  - mongo
+  - redis
+  ports:
+  - '3000:3000'
+  environment:
+  - NODE_ENV=production
+  - WIFIDOG_MONGO_HOST=mongo
+  - WIFIDOG_REDIS_HOST=redis

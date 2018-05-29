@@ -45,7 +45,7 @@ codeverify.genCode = async function(req, res) {
     return Success.errorResponse(res, {message: '手机号格式错误!'}, 200);
   }
 
-  let tmp = await redis_cli.keysAsync(phone + ':*');
+  let tmp = await redis_cli.keysAsync(phone);
 
   if (tmp && tmp.length > 0) {
     return Success.errorResponse(res, {message: '系统忙，请稍后再试!'}, 200);
@@ -70,6 +70,7 @@ codeverify.genCode = async function(req, res) {
 
   data['md5'] = md5(code);
   redis_cli.set(phone + ':' + code, md5, 'EX', 300);
+  redis_cli.set(phone, code, 'EX', 90);
 
   return Success.successResponse(res, data);
 }

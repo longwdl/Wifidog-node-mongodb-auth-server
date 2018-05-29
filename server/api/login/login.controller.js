@@ -85,6 +85,8 @@ loginrequest.getLogin =  function( req, res ) {
     }
 
     var token = crypt.randomBytes( 64 ).toString('hex');
+    var dest_url = req.body.redirect_url+token+'&phone='+req.body.phone;
+    console.log("dest_url = ", dest_url);
     
     var now = moment();
     var email = req.body.phone.toString() + "@xxx.com";
@@ -100,10 +102,10 @@ loginrequest.getLogin =  function( req, res ) {
                         "lastLoginTime": Math.floor( now.format( 'x' ) )
                       }, function( err, created){
                           if(err) return Errors.errorServer( res, err );
-                          res.redirect(req.body.redirect_url+token);
+                          res.redirect(dest_url);
                       });
       }else{
-        res.redirect(req.body.redirect_url+token);
+        res.redirect(dest_url);
       }
     });
   }

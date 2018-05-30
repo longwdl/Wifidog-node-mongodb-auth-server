@@ -34,7 +34,7 @@ loginrequest.getLogin =  function( req, res ) {
                   res.render('splash', { "text": "Hi "+user.name+", Your limit of 100MB daily data usage has been exhausted.", isReached: isReached} );
                 }else{
                   console.log("Show splash and send token to gateway");
-                  var url = 'http://' + req.query.gw_address + ':' + req.query.gw_port + '/wifidog/auth?token='+user.token;
+                  var url = 'http://' + req.query.gw_address + ':' + req.query.gw_port + '/wifidog/auth?token='+user.token+'&phone='+user.phone;
                   res.render('splash', { "url": url,  "isReached": isReached} );
                 }
               });

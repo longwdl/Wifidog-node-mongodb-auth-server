@@ -23,7 +23,7 @@ let codeverify = {};
 
 function makeCode() {
   let text = "";
-  let possible = "0123456789";
+  let possible = "123456789";
 
   for (let i = 0; i < 6; i++)
     text += possible.charAt(Math.floor(Math.random() * possible.length));
@@ -64,9 +64,8 @@ codeverify.genCode = async function(req, res) {
       return Success.errorResponse(res, {message: '短信发送错误，请稍后再试!'}, 200);
     }
   }
-  else {
-    console.log("Gen new code:", code)
-  }
+
+  console.log("Gen new code:", code)
 
   data['md5'] = md5(code);
   redis_cli.set(phone + ':' + code, md5, 'EX', 300);
